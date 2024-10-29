@@ -1,24 +1,26 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OpenIddict.Abstractions;
+using TodoAppBackend.Constants;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // CORS Policy definition
+var allowedHosts = builder.Configuration[StringConstants.FRONT_END_URL];
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowSpecificOrigin",
+    options.AddPolicy(StringConstants.CORS_POLICY_NAME,
         builder => builder
-            .WithOrigins("http://localhost:4200")
+            .WithOrigins(allowedHosts.Split(";"))
             .AllowAnyMethod()
             .AllowAnyHeader());
 });
 
 // Entity Framework Configuration
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
+    options.UseMySql(builder.Configuration.GetConnectionString(StringConstants.DATABASE_CONNECTION_STRING),
         new MySqlServerVersion(new Version(8, 0, 0))).UseOpenIddict());
 
 
@@ -45,17 +47,8 @@ builder.Services.AddOpenIddidctServices();
 
 builder.Services.AddControllers();
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
 
 app.UseHttpsRedirection();
 app.UseRouting();
@@ -63,7 +56,7 @@ app.UseRouting();
 app.UseAuthentication();  // Authentication middleware
 app.UseAuthorization();   // Authorization middleware
 
-app.UseCors("AllowSpecificOrigin");
+app.UseCors(StringConstants.CORS_POLICY_NAME);
 
 app.MapControllers();
 

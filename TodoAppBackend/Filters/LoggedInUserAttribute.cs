@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Security.Claims;
+using TodoAppBackend.Constants;
 
 public class LoggedInUserAttribute : ActionFilterAttribute
 {
@@ -14,7 +15,7 @@ public class LoggedInUserAttribute : ActionFilterAttribute
             return;
         }
 
-        if (context.ActionArguments.TryGetValue("todoId", out var todoIdObj) && todoIdObj is Guid todoId)
+        if (context.ActionArguments.TryGetValue(StringConstants.TODO_ID, out var todoIdObj) && todoIdObj is Guid todoId)
         {
             var dbContext = (ApplicationDbContext)context.HttpContext.RequestServices.GetService(typeof(ApplicationDbContext));
             var todo = dbContext.Todos.Find(todoId); // Changed to synchronous method

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using TodoAppBackend.DTOs;
 using TodoAppBackend.Models;
 
 [Authorize]
@@ -20,14 +21,9 @@ public class TodosController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateTodo([FromBody] TodoDto todoDto)
+    public async Task<IActionResult> CreateTodo([FromBody] TodoDTO todoDto)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        if (userId == null)
-        {
-            return Unauthorized();
-        }
 
         var todo = new Todo
         {
@@ -48,11 +44,6 @@ public class TodosController : ControllerBase
         var user = await _userManager.GetUserAsync(User);
         var userId = await _userManager.GetUserIdAsync(user);
 
-        if (userId == null)
-        {
-            return Unauthorized();
-        }
-
         const int pageSize = 5;
         var todos = await _dbContext.Todos
             .Where(t => t.UserId == userId && t.DeletedAt == null)
@@ -66,7 +57,7 @@ public class TodosController : ControllerBase
 
     [HttpPut("{todoId}")]
     [ServiceFilter(typeof(LoggedInUserAttribute))]
-    public async Task<IActionResult> UpdateTodo(Guid todoId, [FromBody] TodoDto todoDto)
+    public async Task<IActionResult> UpdateTodo(Guid todoId, [FromBody] TodoDTO todoDto)
     {
         var todo = await _dbContext.Todos.FindAsync(todoId);
 
@@ -100,11 +91,4 @@ public class TodosController : ControllerBase
         await _dbContext.SaveChangesAsync();
         return NoContent();
     }
-}
-
-public class TodoDto
-{
-    public string Title { get; set; } = null!;
-    public string Body { get; set; } = null!;
-    public bool IsCompleted { get; set; } = false;
 }

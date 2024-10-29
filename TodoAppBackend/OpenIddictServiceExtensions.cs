@@ -1,5 +1,6 @@
 ﻿using OpenIddict.Abstractions;
 using OpenIddict.Validation.AspNetCore;
+using TodoAppBackend.Constants;
 
 public static class OpenIddictServiceExtensions
 {
@@ -17,7 +18,7 @@ public static class OpenIddictServiceExtensions
                 options.AddEphemeralEncryptionKey()
                 .AddEphemeralSigningKey();
 
-                options.SetTokenEndpointUris("api/Auth/login")
+                options.SetTokenEndpointUris(StringConstants.TOKEN_ENDPOINT_URI)
                 .AllowPasswordFlow()
                 .AllowRefreshTokenFlow()
                 .AcceptAnonymousClients()
@@ -45,17 +46,6 @@ public static class OpenIddictServiceExtensions
             options.DefaultAuthenticateScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
             options.DefaultChallengeScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
         });
-
-        //services.AddAuthorization(options =>
-        //{
-        //    options.AddPolicy("Bearer", policy =>
-        //    {
-        //        policy.AuthenticationSchemes.Add(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme);
-        //        policy.RequireAuthenticatedUser();
-        //    });
-        //});
-
-
 
         return services;
     }

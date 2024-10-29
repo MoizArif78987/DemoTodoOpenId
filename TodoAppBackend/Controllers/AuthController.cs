@@ -6,6 +6,8 @@ using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
 using System.Collections.Immutable;
 using System.Security.Claims;
+using TodoAppBackend.Constants;
+using TodoAppBackend.DTOs;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
 [ApiController]
@@ -22,7 +24,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
+    public async Task<IActionResult> Register([FromBody] RegisterDTO registerDto)
     {
         var user = new IdentityUser { UserName = registerDto.Email, Email = registerDto.Email };
         var result = await _userManager.CreateAsync(user, registerDto.Password);
@@ -39,18 +41,18 @@ public class AuthController : ControllerBase
     [Route("login")]
     public async Task<IActionResult> Login([FromForm] OpenIddictRequest request)
     {
-        if (request.GrantType == OpenIddictConstants.GrantTypes.Password)
+        if (request.IsPasswordGrantType())
         {
             var user = await _userManager.FindByNameAsync(request.Username);
             if (user == null)
             {
-                return Unauthorized(new { error = "Invalid username or password." });
+                return Unauthorized(new { error = ResponseMessages.INVALID_CREDENTIALS });
             }
 
             var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: false);
             if (!result.Succeeded)
             {
-                return Unauthorized(new { error = "Invalid username or password." });
+                return Unauthorized(new { error = ResponseMessages.INVALID_CREDENTIALS });
             }
 
             ImmutableArray<string> requestedScopes = request.GetScopes();
@@ -63,25 +65,25 @@ public class AuthController : ControllerBase
             var result = await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
             if (!result.Succeeded)
             {
-                return Unauthorized(new { error = "Invalid refresh token." });
+                return Unauthorized(new { error = ResponseMessages.INVALID_REFRESH_TOKEN });
             }
 
             var userId = result.Principal.GetClaim(OpenIddictConstants.Claims.Subject);
             if (userId == null)
             {
-                return Unauthorized(new { error = "Invalid user ID in refresh token." });
+                return Unauthorized(new { error = ResponseMessages.INVALID_ID_IN_RT });
             }
 
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
-                return Unauthorized(new { error = "User not found." });
+                return Unauthorized(new { error = ResponseMessages.USER_NOT_FOUND });
             }
 
             var requestedScopes = request.GetScopes();
             return await GenerateTokenAsync(user, requestedScopes);
         }
-        return BadRequest(new { error = "Unsupported grant type." });
+        return BadRequest(new { error = ResponseMessages.UNSUPPORTED_GRANT_TYPE });
     }
 
 
@@ -119,23 +121,10 @@ public class AuthController : ControllerBase
                 if (claim.Subject is not null && claim.Subject.HasScope(Scopes.Roles))
                     yield return Destinations.IdentityToken;
                 yield break;
-            case "AspNet.Identity.SecurityStamp": yield break;
+            case StringConstants.ASP_ID_SECURITY_STAMP: yield break;
             default:
                 yield return Destinations.AccessToken;
                 yield break;
         }
     }
 }
-
-public class RegisterDto
-{
-    public required string Email { get; set; }
-    public required string Password { get; set; }
-}
-
-public class LoginDto
-{
-    public required string Email { get; set; }
-    public required string Password { get; set; }
-}
-

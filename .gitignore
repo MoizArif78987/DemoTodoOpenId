@@ -1,0 +1,60 @@
+# Ignore build output and other temporary files.
+bin/
+obj/
+debug/
+release/
+
+# Visual Studio specific folders
+.vscode/
+.vs/
+_ReSharper/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Auto-generated files
+*.generated.cs
+*.designer.cs
+
+# Package directories
+packages/
+*.nupkg
+*.snupkg
+
+# Logs, database, and other runtime files
+*.log
+*.ldf
+*.mdf
+*.sqlite
+*.db
+
+# Entity Framework migrations
+Migrations/
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# Publish output
+*.publish.xml
+
+# NPM
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# JetBrains Rider
+.idea/
+.idea_modules/
+resharper/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Secrets and sensitive files
+appsettings.Development.json
+appsettings.Local.json
+appsettings.*.json
